@@ -1,10 +1,13 @@
 <template>
   <div class="game-board">
     <div v-for="position in positions"
-      :key="position.name"
+      :key="`space-${position.name}`"
       :style="{ 'background-color': position.colour }"
-      class="space"
-      :data-position="position.name"></div>
+      class="space">
+        <img v-if="positionHasPiece(position.name)"
+        :src="require(`@/assets/chesspieces/${positionPieceImg(position.name)}`)"
+        :alt="positionAlt(position.name)">
+      </div>
   </div>
 </template>
 
@@ -18,8 +21,10 @@ type Position = {
 
 type Piece = {
   name: 'King' | 'Queen' | 'Bishop' | 'Knight' | 'Rook' | 'Pawn',
-  team: 'light' | 'dark',
-  position: string
+  team: 'Light' | 'Dark',
+  position: string,
+  icon: string,
+  status: 'Alive' | 'Dead'
 }
 
 export default defineComponent({
@@ -34,9 +39,9 @@ export default defineComponent({
 
         const colour = () => {
           if ((evenLetter && !evenNumber) || (!evenLetter && evenNumber)) {
-            return '#111111'
+            return '#098CCD'
           } else {
-            return '#eeeeee'
+            return '#CFE8F4'
           }
         }
 
@@ -47,109 +52,161 @@ export default defineComponent({
       })
     }
 
-    const lights:Array<Piece> = [
+    // const chesspieces = '@/assets/chesspieces'
+
+    const gamePieces:Array<Piece> = [
       {
         name: 'King',
-        team: 'light',
-        position: 'E1'
+        team: 'Light',
+        position: 'E1',
+        icon: 'King_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Queen',
-        team: 'light',
-        position: 'D1'
+        team: 'Light',
+        position: 'D1',
+        icon: 'Queen_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Bishop',
-        team: 'light',
-        position: 'C1'
+        team: 'Light',
+        position: 'C1',
+        icon: 'Bishop_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Bishop',
-        team: 'light',
-        position: 'F1'
+        team: 'Light',
+        position: 'F1',
+        icon: 'Bishop_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Knight',
-        team: 'light',
-        position: 'B1'
+        team: 'Light',
+        position: 'B1',
+        icon: 'Knight_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Knight',
-        team: 'light',
-        position: 'G1'
+        team: 'Light',
+        position: 'G1',
+        icon: 'Knight_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Rook',
-        team: 'light',
-        position: 'A1'
+        team: 'Light',
+        position: 'A1',
+        icon: 'Rook_light.svg',
+        status: 'Alive'
       },
       {
         name: 'Rook',
-        team: 'light',
-        position: 'H1'
-      }
-    ]
-
-    for (let i = 0; i < 7; i++) {
-      lights.push({
-        name: 'Pawn',
-        team: 'light',
-        position: `${xAxis[i]}2`
-      })
-    }
-
-    const darks:Array<Piece> = [
+        team: 'Light',
+        position: 'H1',
+        icon: 'Rook_light.svg',
+        status: 'Alive'
+      },
       {
         name: 'King',
-        team: 'dark',
-        position: 'E8'
+        team: 'Dark',
+        position: 'E8',
+        icon: 'King_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Queen',
-        team: 'dark',
-        position: 'D8'
+        team: 'Dark',
+        position: 'D8',
+        icon: 'Queen_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Bishop',
-        team: 'dark',
-        position: 'C8'
+        team: 'Dark',
+        position: 'C8',
+        icon: 'Bishop_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Bishop',
-        team: 'dark',
-        position: 'F8'
+        team: 'Dark',
+        position: 'F8',
+        icon: 'Bishop_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Knight',
-        team: 'dark',
-        position: 'B8'
+        team: 'Dark',
+        position: 'B8',
+        icon: 'Knight_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Knight',
-        team: 'dark',
-        position: 'G8'
+        team: 'Dark',
+        position: 'G8',
+        icon: 'Knight_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Rook',
-        team: 'dark',
-        position: 'A8'
+        team: 'Dark',
+        position: 'A8',
+        icon: 'Rook_dark.svg',
+        status: 'Alive'
       },
       {
         name: 'Rook',
-        team: 'dark',
-        position: 'H8'
+        team: 'Dark',
+        position: 'H8',
+        icon: 'Rook_dark.svg',
+        status: 'Alive'
       }
     ]
 
-    for (let i = 0; i < 7; i++) {
-      darks.push({
+    for (let i = 0; i < 8; i++) {
+      gamePieces.push({
         name: 'Pawn',
-        team: 'dark',
-        position: `${xAxis[i]}7`
+        team: 'Light',
+        position: `${xAxis[i]}2`,
+        icon: 'Pawn_light.svg',
+        status: 'Alive'
+      })
+      gamePieces.push({
+        name: 'Pawn',
+        team: 'Dark',
+        position: `${xAxis[i]}7`,
+        icon: 'Pawn_dark.svg',
+        status: 'Alive'
       })
     }
 
-    return { positions }
+    const positionHasPiece = (position:string) => {
+      const piece = gamePieces.find(x => x.position === position)
+      return piece !== undefined
+    }
+    const positionPieceImg = (position:string) => {
+      const piece = gamePieces.find(x => x.position === position)
+      if (piece) {
+        return piece.icon
+      } else {
+        return ''
+      }
+    }
+    const positionAlt = (position:string) => {
+      const piece = gamePieces.find(x => x.position === position)
+      if (piece) {
+        return `${piece.team}-${piece.name}`
+      } else {
+        return ''
+      }
+    }
+    return { positions, gamePieces, positionHasPiece, positionPieceImg, positionAlt }
   }
 })
 </script>
