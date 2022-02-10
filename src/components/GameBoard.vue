@@ -292,7 +292,7 @@ export default defineComponent({
 .x-axis {
   flex-direction: row;
   height: 20px;
-  line-height: 20px;
+  line-height: 22px;
   bottom: 0;
   right: 0;
 }
