@@ -2,20 +2,20 @@
   <div class="game-board">
 
     <div class="y-axis">
-      <div v-for="y in 8" :key="y">{{y}}</div>
+      <div v-for="y in yAxis" :key="y">{{y}}</div>
     </div>
 
     <div class="spaces">
       <div v-for="position in positions"
         :key="`space-${position.name}`"
-        :style="{ 'background-color': position.colour }"
         class="space"
+        :class="[position.colour, position.highlight ? 'highlight' : '']"
+        @click="clickSpace(position)"
       >
 
-        <img v-if="positionHasPiece(position.name)"
-        :src="require(`@/assets/chesspieces/${positionPieceImg(position.name)}`)"
-        :alt="positionAlt(position.name)"
-        @click="clickPiece(position.name)">
+        <img v-if="position.gamePiece"
+        :src="position.gamePiece.img"
+        :alt="position.gamePiece.imgAlt">
 
       </div>
     </div>
@@ -28,236 +28,61 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from 'vue'
-
-type Position = {
-  name: string,
-  colour: string
-}
-
-type Piece = {
-  name: 'King' | 'Queen' | 'Bishop' | 'Knight' | 'Rook' | 'Pawn',
-  team: 'Light' | 'Dark',
-  position: string,
-  icon: string,
-  status: 'Alive' | 'Dead'
-}
+import { defineComponent, ref, Ref } from 'vue'
+import { getPositions, getValidMoves, xAxis, yAxis, Position } from '@/game-objects'
 
 export default defineComponent({
   setup() {
-    const xAxis = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
-    const positions = ref<Array<Position>>([])
+    const positions = ref(getPositions())
+    const whosTurn = ref('Light')
+    const activePosition:Ref<Position | undefined> = ref()
 
-    for (let i = 8; i > 0; i--) {
-      xAxis.forEach((letter, j) => {
-        const evenLetter = (j + 1) % 2 === 0
-        const evenNumber = i % 2 === 0
-
-        const colour = () => {
-          if ((evenLetter && !evenNumber) || (!evenLetter && evenNumber)) {
-            return '#098CCD'
-          } else {
-            return '#CFE8F4'
-          }
+    const highlightSpaces = (validMoves: Array<Position>) => {
+      validMoves.forEach(move => {
+        const position = positions.value.find(y => y.name === move.name)
+        if (position) {
+          position.highlight = true
         }
-
-        positions.value.push({
-          name: `${letter}${i}`,
-          colour: colour()
-        })
       })
     }
 
-    // const chesspieces = '@/assets/chesspieces'
-
-    const gamePieces = ref<Array<Piece>>([
-      {
-        name: 'King',
-        team: 'Light',
-        position: 'E1',
-        icon: 'King_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Queen',
-        team: 'Light',
-        position: 'D1',
-        icon: 'Queen_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Bishop',
-        team: 'Light',
-        position: 'C1',
-        icon: 'Bishop_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Bishop',
-        team: 'Light',
-        position: 'F1',
-        icon: 'Bishop_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Knight',
-        team: 'Light',
-        position: 'B1',
-        icon: 'Knight_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Knight',
-        team: 'Light',
-        position: 'G1',
-        icon: 'Knight_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Rook',
-        team: 'Light',
-        position: 'A1',
-        icon: 'Rook_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Rook',
-        team: 'Light',
-        position: 'H1',
-        icon: 'Rook_light.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'King',
-        team: 'Dark',
-        position: 'E8',
-        icon: 'King_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Queen',
-        team: 'Dark',
-        position: 'D8',
-        icon: 'Queen_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Bishop',
-        team: 'Dark',
-        position: 'C8',
-        icon: 'Bishop_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Bishop',
-        team: 'Dark',
-        position: 'F8',
-        icon: 'Bishop_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Knight',
-        team: 'Dark',
-        position: 'B8',
-        icon: 'Knight_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Knight',
-        team: 'Dark',
-        position: 'G8',
-        icon: 'Knight_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Rook',
-        team: 'Dark',
-        position: 'A8',
-        icon: 'Rook_dark.svg',
-        status: 'Alive'
-      },
-      {
-        name: 'Rook',
-        team: 'Dark',
-        position: 'H8',
-        icon: 'Rook_dark.svg',
-        status: 'Alive'
-      }
-    ])
-
-    for (let i = 0; i < 8; i++) {
-      gamePieces.value.push({
-        name: 'Pawn',
-        team: 'Light',
-        position: `${xAxis[i]}2`,
-        icon: 'Pawn_light.svg',
-        status: 'Alive'
-      })
-      gamePieces.value.push({
-        name: 'Pawn',
-        team: 'Dark',
-        position: `${xAxis[i]}7`,
-        icon: 'Pawn_dark.svg',
-        status: 'Alive'
+    const clearHighlights = () => {
+      positions.value.forEach(position => {
+        position.highlight = false
       })
     }
 
-    const positionHasPiece = (position:string) => {
-      const piece = gamePieces.value.find(x => x.position === position)
-      if (piece) {
-        return piece
-      } else {
-        return false
-      }
-    }
-    const positionPieceImg = (position:string) => {
-      const piece = positionHasPiece(position)
-      if (piece) {
-        return piece.icon
-      } else {
-        return ''
-      }
-    }
-    const positionAlt = (position:string) => {
-      const piece = positionHasPiece(position)
-      if (piece) {
-        return `${piece.team}-${piece.name}`
-      } else {
-        return ''
-      }
+    const switchTurns = () => {
+      whosTurn.value = whosTurn.value === 'Light' ? 'Dark' : 'Light'
     }
 
-    const highlightSpaces = (piece: Piece) => {
-      if (piece.name === 'Pawn') {
-        if (piece.team === 'Light') {
-          const position = positions.value.find(x => x.name === `${piece.position[0]}${parseInt(piece.position[1]) + 1}`)
-          if (position) {
-            position.colour = '#FFA500'
-          }
-        } else {
-          const position = positions.value.find(x => x.name === `${piece.position[0]}${parseInt(piece.position[1]) - 1}`)
-          if (position) {
-            position.colour = '#FFA500'
-          }
+    const clickSpace = (clickedPosition:Position) => {
+      if (clickedPosition.highlight) {
+        // Complete the move
+        if (activePosition.value && activePosition.value.gamePiece) {
+          clickedPosition.gamePiece = activePosition.value.gamePiece
+          activePosition.value.gamePiece = undefined
+          clickedPosition.gamePiece.status = 'Moved'
+          clearHighlights()
+          switchTurns()
         }
+      } else if (clickedPosition.gamePiece && clickedPosition.gamePiece.team === whosTurn.value) {
+        // Highlight spaces
+        clearHighlights()
+        const validMoves = getValidMoves(clickedPosition)
+        highlightSpaces(validMoves)
+        activePosition.value = clickedPosition
+      } else {
+        // Clear the highlights
+        clearHighlights()
       }
-    }
-
-    const clickPiece = (position:string) => {
-      const piece = positionHasPiece(position)
-      if (!piece) return
-
-      highlightSpaces(piece)
     }
 
     return {
       positions,
-      gamePieces,
       xAxis,
-      positionHasPiece,
-      positionPieceImg,
-      positionAlt,
-      clickPiece
+      yAxis,
+      clickSpace
     }
   }
 })
@@ -283,6 +108,18 @@ export default defineComponent({
   width: 50px;
   height: 50px;
 }
+.space.dark {
+  background-color: #098CCD;
+}
+.space.light {
+  background-color: #CFE8F4;
+}
+.space.dark.highlight {
+  background: radial-gradient(#FFA500, #098CCD);;
+}
+.space.light.highlight {
+  background: radial-gradient(#FFA500, #CFE8F4);;
+}
 .x-axis,
 .y-axis {
   display: flex;
@@ -297,7 +134,7 @@ export default defineComponent({
   right: 0;
 }
 .y-axis {
-  flex-direction: column-reverse;
+  flex-direction: column;
   width: 20px;
   top: 0;
   left: 0;
