@@ -70,7 +70,6 @@ export default defineComponent({
         // Highlight spaces
         clearHighlights()
         const validMoves = getValidMoves(clickedPosition)
-        console.log(validMoves)
         highlightSpaces(validMoves)
         activePosition.value = clickedPosition
       } else {
