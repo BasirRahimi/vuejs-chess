@@ -198,6 +198,28 @@ yAxis.forEach((number) => {
 
 const getPositions = ():Array<Position> => { return positions }
 
+const pathIsClear = (startPos:Position, endPos:Position):boolean => {
+  let clear = true
+  const whitesMove = parseInt(startPos.name[1]) < parseInt(endPos.name[1])
+
+  if (whitesMove) {
+    for (let i = parseInt(startPos.name[1]) + 1; i <= parseInt(endPos.name[1]); i++) {
+      const position = positions.find(x => x.name === `${startPos.name[0]}${i}`)
+      if (position && position.gamePiece) {
+        clear = false
+      }
+    }
+  } else {
+    for (let i = parseInt(startPos.name[1]) - 1; i >= parseInt(endPos.name[1]); i--) {
+      const position = positions.find(x => x.name === `${startPos.name[0]}${i}`)
+      if (position && position.gamePiece) {
+        clear = false
+      }
+    }
+  }
+  return clear
+}
+
 const getValidMoves = (position:Position):Array<Position> => {
   if (!position.gamePiece) return []
   const gamePiece = position.gamePiece
@@ -229,10 +251,10 @@ const getValidMoves = (position:Position):Array<Position> => {
     const validMoves:Array<Position> = []
 
     potentialMoves.forEach(move => {
-      const position = positions.find(y => y.name === move.position)
-      if (!position) return
+      const movePosition = positions.find(y => y.name === move.position)
+      if (!movePosition) return
 
-      const positionHasGamePiece = position.gamePiece !== undefined
+      const positionHasGamePiece = movePosition.gamePiece !== undefined
 
       if (move.conditions === 'None') {
         validMoves.push(position)
@@ -243,14 +265,15 @@ const getValidMoves = (position:Position):Array<Position> => {
         move.conditions.forEach(condition => {
           if ((condition === 'Empty' && positionHasGamePiece) ||
             (condition === 'FirstMove' && gamePiece.status === 'Moved') ||
-            (condition === 'Kill' && !positionHasGamePiece)
+            (condition === 'Kill' && !positionHasGamePiece) ||
+            (condition === 'ClearPath' && !pathIsClear(position, movePosition))
           ) {
             validMove = false
           }
         })
 
         if (validMove) {
-          validMoves.push(position)
+          validMoves.push(movePosition)
         }
       }
     })
