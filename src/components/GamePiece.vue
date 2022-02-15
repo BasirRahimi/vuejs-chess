@@ -1,12 +1,14 @@
 <template>
-  <slot v-if="piece" :piece="piece"></slot>
+  <img :src="piece.img"
+  :alt="piece.imgAlt"
+  @click.stop="$emit('pieceClicked', piece)" />
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
 import { Piece } from '@/game-objects'
 
 export default defineComponent({
-  name: 'GamePieceWrapper',
+  name: 'GamePiece',
   props: {
     piece: Object as PropType<Piece>
   }

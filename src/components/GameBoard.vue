@@ -6,16 +6,15 @@
     </div>
 
     <div class="spaces">
-      <div v-for="position in positions"
+      <div v-for="position in game.positions"
         :key="`space-${position.name}`"
         class="space"
         :class="[position.colour, position.highlight ? 'highlight' : '']"
       >
-        <GamePieceWrapper v-slot="slotData" :piece="game.pieces.find(x => x.startPosition === position.name)">
-          <img :src="slotData.piece.img"
-          :alt="slotData.piece.imgAlt"
-          @click="pieceClicked(slotData.piece)">
-        </GamePieceWrapper>
+        <GamePiece v-if="game.pieces.find(x => x.position === position.name)"
+          :piece="game.pieces.find(x => x.position === position.name)"
+          @piece-clicked="pieceClicked"
+        />
 
       </div>
     </div>
@@ -28,73 +27,33 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, Ref } from 'vue'
-import { getPositions, getValidMoves, xAxis, yAxis, Position, Game, Piece } from '@/game-objects'
-import GamePieceWrapper from './GamePieceWrapper.vue'
+import { defineComponent, ref, onBeforeMount } from 'vue'
+import { Game, Piece } from '@/game-objects'
+import GamePiece from './GamePiece.vue'
 
 export default defineComponent({
   name: 'GameBoard',
-  components: { GamePieceWrapper },
+  components: { GamePiece },
   setup() {
-    const positions = ref(getPositions())
-    const whosTurn = ref('Light')
-    const activePosition:Ref<Position | undefined> = ref()
-
-    const highlightSpaces = (validMoves: Array<Position>) => {
-      validMoves.forEach(move => {
-        const position = positions.value.find(y => y.name === move.name)
-        if (position) {
-          position.highlight = true
-        }
-      })
-    }
-
-    const clearHighlights = () => {
-      positions.value.forEach(position => {
-        position.highlight = false
-      })
-    }
-
-    const switchTurns = () => {
-      whosTurn.value = whosTurn.value === 'Light' ? 'Dark' : 'Light'
-    }
-
-    const clickSpace = (clickedPosition:Position) => {
-      if (clickedPosition.highlight) {
-        // Complete the move
-        if (activePosition.value && activePosition.value.gamePiece) {
-          clickedPosition.gamePiece = activePosition.value.gamePiece
-          activePosition.value.gamePiece = undefined
-          clickedPosition.gamePiece.status = 'Moved'
-          clearHighlights()
-          switchTurns()
-        }
-      } else if (clickedPosition.gamePiece && clickedPosition.gamePiece.team === whosTurn.value) {
-        // Highlight spaces
-        clearHighlights()
-        const validMoves = getValidMoves(clickedPosition)
-        highlightSpaces(validMoves)
-        activePosition.value = clickedPosition
-      } else {
-        // Clear the highlights
-        clearHighlights()
-      }
-    }
+    const game = ref(new Game())
 
     const pieceClicked = (piece:Piece) => {
-      // highlight spaces
-    }
+      if ((piece.team === 'Light' && game.value.activePlayer === 2) ||
+      ((piece.team === 'Dark' && game.value.activePlayer === 1))) {
+        // clicked on enemy piece, abort
+        return
+      }
 
-    const game = ref(new Game())
+      game.value.clearHighlights()
+      game.value.highLightValidMoves(piece)
+      console.log('pieceClicked')
+      console.log(game.value)
+    }
 
     return {
       game,
-      positions,
-      xAxis,
-      yAxis,
-      clickSpace,
       pieceClicked,
-      GamePieceWrapper
+      GamePiece
     }
   }
 })
