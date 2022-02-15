@@ -22,6 +22,163 @@ type Move = {
 const xAxis = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
 const yAxis = ['8', '7', '6', '5', '4', '3', '2', '1']
 
+class Game {
+  readonly files:Array<string> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
+  readonly ranks:Array<number> = [8, 7, 6, 5, 4, 3, 2, 1]
+
+  pieces:Array<Piece> = [
+    {
+      name: 'King',
+      team: 'Light',
+      startPosition: 'E1',
+      img: require('@/assets/chesspieces/King_light.svg'),
+      imgAlt: 'Light-King',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Queen',
+      team: 'Light',
+      startPosition: 'D1',
+      img: require('@/assets/chesspieces/Queen_light.svg'),
+      imgAlt: 'Light-Queen',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Bishop',
+      team: 'Light',
+      startPosition: 'C1',
+      img: require('@/assets/chesspieces/Bishop_light.svg'),
+      imgAlt: 'Light-Bishop',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Bishop',
+      team: 'Light',
+      startPosition: 'F1',
+      img: require('@/assets/chesspieces/Bishop_light.svg'),
+      imgAlt: 'Light-Bishop',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Knight',
+      team: 'Light',
+      startPosition: 'B1',
+      img: require('@/assets/chesspieces/Knight_light.svg'),
+      imgAlt: 'Light-Knight',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Knight',
+      team: 'Light',
+      startPosition: 'G1',
+      img: require('@/assets/chesspieces/Knight_light.svg'),
+      imgAlt: 'Light-Knight',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Rook',
+      team: 'Light',
+      startPosition: 'A1',
+      img: require('@/assets/chesspieces/Rook_light.svg'),
+      imgAlt: 'Light-Rook',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Rook',
+      team: 'Light',
+      startPosition: 'H1',
+      img: require('@/assets/chesspieces/Rook_light.svg'),
+      imgAlt: 'Light-Rook',
+      status: 'NotMoved'
+    },
+    {
+      name: 'King',
+      team: 'Dark',
+      startPosition: 'E8',
+      img: require('@/assets/chesspieces/King_dark.svg'),
+      imgAlt: 'Dark-King',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Queen',
+      team: 'Dark',
+      startPosition: 'D8',
+      img: require('@/assets/chesspieces/Queen_dark.svg'),
+      imgAlt: 'Dark-Queen',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Bishop',
+      team: 'Dark',
+      startPosition: 'C8',
+      img: require('@/assets/chesspieces/Bishop_dark.svg'),
+      imgAlt: 'Dark-Bishop',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Bishop',
+      team: 'Dark',
+      startPosition: 'F8',
+      img: require('@/assets/chesspieces/Bishop_dark.svg'),
+      imgAlt: 'Dark-Bishop',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Knight',
+      team: 'Dark',
+      startPosition: 'B8',
+      img: require('@/assets/chesspieces/Knight_dark.svg'),
+      imgAlt: 'Dark-Knight',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Knight',
+      team: 'Dark',
+      startPosition: 'G8',
+      img: require('@/assets/chesspieces/Knight_dark.svg'),
+      imgAlt: 'Dark-Knight',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Rook',
+      team: 'Dark',
+      startPosition: 'A8',
+      img: require('@/assets/chesspieces/Rook_dark.svg'),
+      imgAlt: 'Dark-Rook',
+      status: 'NotMoved'
+    },
+    {
+      name: 'Rook',
+      team: 'Dark',
+      startPosition: 'H8',
+      img: require('@/assets/chesspieces/Rook_dark.svg'),
+      imgAlt: 'Dark-Rook',
+      status: 'NotMoved'
+    }
+  ]
+
+  constructor() {
+    for (let i = 0; i < 8; i++) {
+      this.pieces.push({
+        name: 'Pawn',
+        team: 'Light',
+        startPosition: `${xAxis[i]}2`,
+        img: require('@/assets/chesspieces/Pawn_light.svg'),
+        imgAlt: 'Light-Pawn',
+        status: 'NotMoved'
+      },
+      {
+        name: 'Pawn',
+        team: 'Dark',
+        startPosition: `${xAxis[i]}7`,
+        img: require('@/assets/chesspieces/Pawn_dark.svg'),
+        imgAlt: 'Dark-Pawn',
+        status: 'NotMoved'
+      })
+    }
+  }
+}
+
 const gamePieces:Array<Piece> = [
   {
     name: 'King',
@@ -284,4 +441,4 @@ const getValidMoves = (position:Position):Array<Position> => {
   return []
 }
 
-export { getPositions, getValidMoves, xAxis, yAxis, Piece, Position }
+export { getPositions, getValidMoves, xAxis, yAxis, Piece, Position, Game }

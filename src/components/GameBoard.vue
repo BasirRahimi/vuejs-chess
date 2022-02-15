@@ -2,7 +2,7 @@
   <div class="game-board">
 
     <div class="y-axis">
-      <div v-for="y in yAxis" :key="y">{{y}}</div>
+      <div v-for="y in game.ranks" :key="y">{{y}}</div>
     </div>
 
     <div class="spaces">
@@ -10,18 +10,18 @@
         :key="`space-${position.name}`"
         class="space"
         :class="[position.colour, position.highlight ? 'highlight' : '']"
-        @click="clickSpace(position)"
       >
-
-        <img v-if="position.gamePiece"
-        :src="position.gamePiece.img"
-        :alt="position.gamePiece.imgAlt">
+        <GamePieceWrapper v-slot="slotData" :piece="game.pieces.find(x => x.startPosition === position.name)">
+          <img :src="slotData.piece.img"
+          :alt="slotData.piece.imgAlt"
+          @click="pieceClicked(slotData.piece)">
+        </GamePieceWrapper>
 
       </div>
     </div>
 
     <div class="x-axis">
-      <div v-for="x in xAxis" :key="x">{{x}}</div>
+      <div v-for="x in game.files" :key="x">{{x}}</div>
     </div>
 
   </div>
@@ -29,9 +29,12 @@
 
 <script lang="ts">
 import { defineComponent, ref, Ref } from 'vue'
-import { getPositions, getValidMoves, xAxis, yAxis, Position } from '@/game-objects'
+import { getPositions, getValidMoves, xAxis, yAxis, Position, Game, Piece } from '@/game-objects'
+import GamePieceWrapper from './GamePieceWrapper.vue'
 
 export default defineComponent({
+  name: 'GameBoard',
+  components: { GamePieceWrapper },
   setup() {
     const positions = ref(getPositions())
     const whosTurn = ref('Light')
@@ -78,11 +81,20 @@ export default defineComponent({
       }
     }
 
+    const pieceClicked = (piece:Piece) => {
+      // highlight spaces
+    }
+
+    const game = ref(new Game())
+
     return {
+      game,
       positions,
       xAxis,
       yAxis,
-      clickSpace
+      clickSpace,
+      pieceClicked,
+      GamePieceWrapper
     }
   }
 })
