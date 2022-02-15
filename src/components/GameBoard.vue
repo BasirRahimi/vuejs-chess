@@ -27,7 +27,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onBeforeMount } from 'vue'
+import { defineComponent, ref } from 'vue'
 import { Game, Piece } from '@/game-objects'
 import GamePiece from './GamePiece.vue'
 
@@ -46,8 +46,6 @@ export default defineComponent({
 
       game.value.clearHighlights()
       game.value.highLightValidMoves(piece)
-      console.log('pieceClicked')
-      console.log(game.value)
     }
 
     return {

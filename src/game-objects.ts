@@ -206,20 +206,17 @@ class Game {
   }
 
   highLightValidMoves = (piece:Piece):void => {
+    const enemyTeam = piece.team === 'Light' ? 'Dark' : 'Light'
+    const rankIndex = this.files.findIndex((letter:string) => { return letter === piece.position[0] })
+
     if (piece.name === 'Pawn') {
       const yProgression1 = piece.team === 'Light' ? parseInt(piece.position[1]) + 1 : parseInt(piece.position[1]) - 1
       const yProgression2 = piece.team === 'Light' ? parseInt(piece.position[1]) + 2 : parseInt(piece.position[1]) - 2
-      const rankIndex = this.files.findIndex((letter:string) => { return letter === piece.position[0] })
 
-      const pathIsClear = ():boolean => {
-        if (
-          this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression1}`) ||
-          this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression2}`)
-        ) {
-          return false
-        }
-        return true
-      }
+      const progression1Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression1}`) === undefined
+      const progression2Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression2}`) === undefined
+      const pathIsClear = progression1Empty && progression2Empty
+
       const potentialMoves:Array<Move> = [
         {
           position: `${piece.position[0]}${yProgression1}`,
@@ -242,25 +239,37 @@ class Game {
       potentialMoves.forEach(move => {
         const newPos = this.positions.value.find(x => x.name === move.position)
         if (!newPos) return
-        const positionHasGamePiece = this.pieces.value.find(x => x.position === newPos.name) !== undefined
+        const positionHasGamePiece = this.pieces.value.find(x => x.position === newPos.name)
+        const positionHasEnemyPiece = positionHasGamePiece ? positionHasGamePiece.team === enemyTeam : false
 
         if (move.conditions === 'None') {
           // highlight
           newPos.highlight = true
         } else {
+          let conditionsMet = true
           move.conditions.forEach(condition => {
             if (
-              (condition === 'Empty' && !positionHasGamePiece) ||
-              (condition === 'FirstMove' && piece.status === 'NotMoved') ||
-              (condition === 'Kill' && positionHasGamePiece) ||
-              (condition === 'ClearPath' && pathIsClear())
+              (condition === 'Empty' && positionHasGamePiece) ||
+              (condition === 'FirstMove' && piece.status !== 'NotMoved') ||
+              (condition === 'Kill' && (!positionHasGamePiece || !positionHasEnemyPiece)) ||
+              (condition === 'ClearPath' && !pathIsClear)
             ) {
-              // highlight
-              newPos.highlight = true
+              conditionsMet = false
             }
           })
+          newPos.highlight = conditionsMet
         }
       })
+    } else if (piece.name === 'Queen') {
+      console.log(piece)
+    } else if (piece.name === 'Rook') {
+      console.log(piece)
+    } else if (piece.name === 'Knight') {
+      console.log(piece)
+    } else if (piece.name === 'Bishop') {
+      console.log(piece)
+    } else if (piece.name === 'King') {
+      console.log(piece)
     }
   }
 }
