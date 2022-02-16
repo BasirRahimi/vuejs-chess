@@ -20,6 +20,8 @@ type Move = {
   conditions: ('Empty' | 'Kill' | 'FirstMove' | 'ClearPath')[] | 'None'
 }
 
+type Direction = 'up' | 'down' | 'left' | 'right' | 'up-right' | 'up-left' | 'down-right' | 'down-left'
+
 class Game {
   readonly files:Array<string> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
   readonly ranks:Array<number> = [8, 7, 6, 5, 4, 3, 2, 1]
@@ -206,32 +208,190 @@ class Game {
   }
 
   highLightValidMoves = (piece:Piece):void => {
+    this.validMoves(piece).forEach(move => {
+      const pos = this.positions.value.find(pos => pos.name === move)
+      if (pos) pos.highlight = true
+    })
+  }
+
+  progressiveMoves = (direction:Direction, piece:Piece):Array<string> => {
+    // A valid move is one where the space is not occupied by a friendly piece
+    const moves = []
+
+    if (direction === 'down') {
+      let rank = parseInt(piece.position[1]) - 1
+      while (rank >= 1) {
+        const newPos = `${piece.position[0]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        rank--
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'up') {
+      let rank = parseInt(piece.position[1]) + 1
+      while (rank <= 8) {
+        const newPos = `${piece.position[0]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        rank++
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'left') {
+      let fileIndex = this.files.indexOf(piece.position[0]) - 1
+      while (fileIndex >= 0) {
+        const newPos = `${this.files[fileIndex]}${piece.position[1]}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex--
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'right') {
+      let fileIndex = this.files.indexOf(piece.position[0]) + 1
+      while (fileIndex <= 7) {
+        const newPos = `${this.files[fileIndex]}${piece.position[1]}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex++
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'up-left') {
+      let fileIndex = this.files.indexOf(piece.position[0]) - 1
+      let rank = parseInt(piece.position[1]) + 1
+
+      while (fileIndex >= 0 || rank <= 8) {
+        const newPos = `${this.files[fileIndex]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex--
+        rank++
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'up-right') {
+      let fileIndex = this.files.indexOf(piece.position[0]) + 1
+      let rank = parseInt(piece.position[1]) + 1
+
+      while (fileIndex <= 7 || rank <= 8) {
+        const newPos = `${this.files[fileIndex]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex++
+        rank++
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'down-left') {
+      let fileIndex = this.files.indexOf(piece.position[0]) - 1
+      let rank = parseInt(piece.position[1]) - 1
+
+      while (fileIndex >= 0 || rank >= 1) {
+        const newPos = `${this.files[fileIndex]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex--
+        rank--
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    } else if (direction === 'down-right') {
+      let fileIndex = this.files.indexOf(piece.position[0]) + 1
+      let rank = parseInt(piece.position[1]) - 1
+
+      while (fileIndex <= 7 || rank >= 1) {
+        const newPos = `${this.files[fileIndex]}${rank}`
+        const newPosHasPiece = this.pieces.value.find(x => x.position === newPos)
+
+        fileIndex++
+        rank--
+
+        if (newPosHasPiece === undefined) {
+          moves.push(newPos)
+        } else if (newPosHasPiece.team !== piece.team) {
+          moves.push(newPos)
+        } else {
+          break
+        }
+      }
+    }
+
+    return moves
+  }
+
+  validMoves = (piece:Piece):Array<string> => {
     const enemyTeam = piece.team === 'Light' ? 'Dark' : 'Light'
-    const rankIndex = this.files.findIndex((letter:string) => { return letter === piece.position[0] })
+    const fileIndex = this.files.findIndex((letter:string) => { return letter === piece.position[0] })
+
+    let validMoves:Array<string> = []
 
     if (piece.name === 'Pawn') {
-      const yProgression1 = piece.team === 'Light' ? parseInt(piece.position[1]) + 1 : parseInt(piece.position[1]) - 1
-      const yProgression2 = piece.team === 'Light' ? parseInt(piece.position[1]) + 2 : parseInt(piece.position[1]) - 2
+      const rankProgression1 = piece.team === 'Light' ? parseInt(piece.position[1]) + 1 : parseInt(piece.position[1]) - 1
+      const rankProgression2 = piece.team === 'Light' ? parseInt(piece.position[1]) + 2 : parseInt(piece.position[1]) - 2
 
-      const progression1Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression1}`) === undefined
-      const progression2Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${yProgression2}`) === undefined
+      const progression1Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${rankProgression1}`) === undefined
+      const progression2Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${rankProgression2}`) === undefined
       const pathIsClear = progression1Empty && progression2Empty
 
       const potentialMoves:Array<Move> = [
         {
-          position: `${piece.position[0]}${yProgression1}`,
+          position: `${piece.position[0]}${rankProgression1}`,
           conditions: ['Empty']
         },
         {
-          position: `${piece.position[0]}${yProgression2}`,
+          position: `${piece.position[0]}${rankProgression2}`,
           conditions: ['FirstMove', 'Empty', 'ClearPath']
         },
         {
-          position: `${this.files[rankIndex + 1]}${yProgression1}`,
+          position: `${this.files[fileIndex + 1]}${rankProgression1}`,
           conditions: ['Kill']
         },
         {
-          position: `${this.files[rankIndex - 1]}${yProgression1}`,
+          position: `${this.files[fileIndex - 1]}${rankProgression1}`,
           conditions: ['Kill']
         }
       ]
@@ -243,8 +403,7 @@ class Game {
         const positionHasEnemyPiece = positionHasGamePiece ? positionHasGamePiece.team === enemyTeam : false
 
         if (move.conditions === 'None') {
-          // highlight
-          newPos.highlight = true
+          validMoves.push(newPos.name)
         } else {
           let conditionsMet = true
           move.conditions.forEach(condition => {
@@ -257,20 +416,47 @@ class Game {
               conditionsMet = false
             }
           })
-          newPos.highlight = conditionsMet
+
+          if (conditionsMet) {
+            validMoves.push(newPos.name)
+          }
         }
       })
     } else if (piece.name === 'Queen') {
-      console.log(piece)
+      validMoves = [
+        ...validMoves,
+        ...this.progressiveMoves('up', piece),
+        ...this.progressiveMoves('down', piece),
+        ...this.progressiveMoves('left', piece),
+        ...this.progressiveMoves('right', piece),
+        ...this.progressiveMoves('up-left', piece),
+        ...this.progressiveMoves('up-right', piece),
+        ...this.progressiveMoves('down-left', piece),
+        ...this.progressiveMoves('down-right', piece)
+      ]
     } else if (piece.name === 'Rook') {
-      console.log(piece)
+      validMoves = [
+        ...validMoves,
+        ...this.progressiveMoves('up', piece),
+        ...this.progressiveMoves('down', piece),
+        ...this.progressiveMoves('left', piece),
+        ...this.progressiveMoves('right', piece)
+      ]
     } else if (piece.name === 'Knight') {
-      console.log(piece)
+
     } else if (piece.name === 'Bishop') {
-      console.log(piece)
+      validMoves = [
+        ...validMoves,
+        ...this.progressiveMoves('up-left', piece),
+        ...this.progressiveMoves('up-right', piece),
+        ...this.progressiveMoves('down-left', piece),
+        ...this.progressiveMoves('down-right', piece)
+      ]
     } else if (piece.name === 'King') {
-      console.log(piece)
+
     }
+
+    return validMoves
   }
 }
 /*
