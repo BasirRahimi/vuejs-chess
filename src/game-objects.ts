@@ -511,8 +511,11 @@ class Game {
 
   moveActivePiece = (pos:Position):void => {
     if (!this.activePiece.value) return
-
     this.activePiece.value.position = pos.name
+
+    if (this.activePiece.value.status === 'NotMoved') {
+      this.activePiece.value.status = 'Moved'
+    }
   }
 }
 
