@@ -1,5 +1,6 @@
 <template>
-  <img :src="piece.img"
+  <img v-if="piece"
+  :src="piece.img"
   :alt="piece.imgAlt"
   @click.stop="$emit('pieceClicked', piece)" />
 </template>

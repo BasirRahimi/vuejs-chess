@@ -10,8 +10,9 @@
         :key="`space-${position.name}`"
         class="space"
         :class="[position.colour, position.highlight ? 'highlight' : '']"
+        @click="positionClicked(position)"
       >
-        <GamePiece v-if="game.pieces.find(x => x.position === position.name)"
+        <GamePiece
           :piece="game.pieces.find(x => x.position === position.name)"
           @piece-clicked="pieceClicked"
         />
@@ -28,7 +29,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Game, Piece } from '@/game-objects'
+import { Game, Piece, Position } from '@/game-objects'
 import GamePiece from './GamePiece.vue'
 
 export default defineComponent({
@@ -45,12 +46,22 @@ export default defineComponent({
       }
 
       game.value.clearHighlights()
+      game.value.activePiece = piece
       game.value.highLightValidMoves(piece)
+    }
+
+    const positionClicked = (pos:Position) => {
+      if (!pos.highlight) return
+
+      game.value.moveActivePiece(pos)
+      game.value.clearHighlights()
+      game.value.activePlayer = game.value.activePlayer === 1 ? 2 : 1
     }
 
     return {
       game,
       pieceClicked,
+      positionClicked,
       GamePiece
     }
   }

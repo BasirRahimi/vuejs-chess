@@ -26,6 +26,7 @@ class Game {
   readonly files:Array<string> = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']
   readonly ranks:Array<number> = [8, 7, 6, 5, 4, 3, 2, 1]
   activePlayer = ref(1)
+  activePiece = ref<Piece>()
   positions = ref<Array<Position>>([])
 
   pieces = ref<Array<Piece>>([
@@ -507,160 +508,12 @@ class Game {
 
     return validMoves
   }
-}
-/*
-  getValidMoves = (position:Position):Array<Position> => {
-    if (!position.gamePiece) return []
-    const gamePiece = position.gamePiece
 
-    if (gamePiece.name === 'Pawn') {
-      const yProgression1 = gamePiece.team === 'Light' ? parseInt(position.name[1]) + 1 : parseInt(position.name[1]) - 1
-      const yProgression2 = gamePiece.team === 'Light' ? parseInt(position.name[1]) + 2 : parseInt(position.name[1]) - 2
-      const xAxisIndex = xAxis.findIndex((letter:string) => { return letter === position.name[0] })
+  moveActivePiece = (pos:Position):void => {
+    if (!this.activePiece.value) return
 
-      const potentialMoves:Array<Move> = [
-        {
-          position: `${position.name[0]}${yProgression1}`,
-          conditions: ['Empty']
-        },
-        {
-          position: `${position.name[0]}${yProgression2}`,
-          conditions: ['FirstMove', 'Empty', 'ClearPath']
-        },
-        {
-          position: `${xAxis[xAxisIndex + 1]}${yProgression1}`,
-          conditions: ['Kill']
-        },
-        {
-          position: `${xAxis[xAxisIndex - 1]}${yProgression1}`,
-          conditions: ['Kill']
-        }
-      ]
-
-      const validMoves:Array<Position> = []
-
-      potentialMoves.forEach(move => {
-        const movePosition = positions.find(y => y.name === move.position)
-        if (!movePosition) return
-
-        const positionHasGamePiece = movePosition.gamePiece !== undefined
-
-        if (move.conditions === 'None') {
-          validMoves.push(position)
-        } else {
-          let validMove = true
-
-          // ClearPath move condition not implemented yet
-          move.conditions.forEach(condition => {
-            if ((condition === 'Empty' && positionHasGamePiece) ||
-              (condition === 'FirstMove' && gamePiece.status === 'Moved') ||
-              (condition === 'Kill' && !positionHasGamePiece) ||
-              (condition === 'ClearPath' && !pathIsClear(position, movePosition))
-            ) {
-              validMove = false
-            }
-          })
-
-          if (validMove) {
-            validMoves.push(movePosition)
-          }
-        }
-      })
-
-      return validMoves
-    }
-
-    return []
+    this.activePiece.value.position = pos.name
   }
 }
-*/
-/*
-const pathIsClear = (startPos:Position, endPos:Position):boolean => {
-  let clear = true
-  const whitesMove = parseInt(startPos.name[1]) < parseInt(endPos.name[1])
 
-  if (whitesMove) {
-    for (let i = parseInt(startPos.name[1]) + 1; i <= parseInt(endPos.name[1]); i++) {
-      const position = positions.find(x => x.name === `${startPos.name[0]}${i}`)
-      if (position && position.gamePiece) {
-        clear = false
-      }
-    }
-  } else {
-    for (let i = parseInt(startPos.name[1]) - 1; i >= parseInt(endPos.name[1]); i--) {
-      const position = positions.find(x => x.name === `${startPos.name[0]}${i}`)
-      if (position && position.gamePiece) {
-        clear = false
-      }
-    }
-  }
-  return clear
-}
-*/
-
-/*
-const getValidMoves = (position:Position):Array<Position> => {
-  if (!position.gamePiece) return []
-  const gamePiece = position.gamePiece
-
-  if (gamePiece.name === 'Pawn') {
-    const yProgression1 = gamePiece.team === 'Light' ? parseInt(position.name[1]) + 1 : parseInt(position.name[1]) - 1
-    const yProgression2 = gamePiece.team === 'Light' ? parseInt(position.name[1]) + 2 : parseInt(position.name[1]) - 2
-    const xAxisIndex = xAxis.findIndex((letter:string) => { return letter === position.name[0] })
-
-    const potentialMoves:Array<Move> = [
-      {
-        position: `${position.name[0]}${yProgression1}`,
-        conditions: ['Empty']
-      },
-      {
-        position: `${position.name[0]}${yProgression2}`,
-        conditions: ['FirstMove', 'Empty', 'ClearPath']
-      },
-      {
-        position: `${xAxis[xAxisIndex + 1]}${yProgression1}`,
-        conditions: ['Kill']
-      },
-      {
-        position: `${xAxis[xAxisIndex - 1]}${yProgression1}`,
-        conditions: ['Kill']
-      }
-    ]
-
-    const validMoves:Array<Position> = []
-
-    potentialMoves.forEach(move => {
-      const movePosition = positions.find(y => y.name === move.position)
-      if (!movePosition) return
-
-      const positionHasGamePiece = movePosition.gamePiece !== undefined
-
-      if (move.conditions === 'None') {
-        validMoves.push(position)
-      } else {
-        let validMove = true
-
-        // ClearPath move condition not implemented yet
-        move.conditions.forEach(condition => {
-          if ((condition === 'Empty' && positionHasGamePiece) ||
-            (condition === 'FirstMove' && gamePiece.status === 'Moved') ||
-            (condition === 'Kill' && !positionHasGamePiece) ||
-            (condition === 'ClearPath' && !pathIsClear(position, movePosition))
-          ) {
-            validMove = false
-          }
-        })
-
-        if (validMove) {
-          validMoves.push(movePosition)
-        }
-      }
-    })
-
-    return validMoves
-  }
-
-  return []
-}
-*/
 export { Piece, Position, Game }
