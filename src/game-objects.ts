@@ -17,7 +17,7 @@ type Position = {
 
 type Move = {
   position: string,
-  conditions: ('Empty' | 'Kill' | 'FirstMove' | 'ClearPath')[] | 'None'
+  conditions: ('Empty' | 'Kill' | 'FirstMove' | 'ClearPath' | 'AvoidCheck')[] | 'None'
 }
 
 type Direction = 'up' | 'down' | 'left' | 'right' | 'up-right' | 'up-left' | 'down-right' | 'down-left'
@@ -366,12 +366,13 @@ class Game {
   validMoves = (piece:Piece):Array<string> => {
     const enemyTeam = piece.team === 'Light' ? 'Dark' : 'Light'
     const fileIndex = this.files.findIndex((letter:string) => { return letter === piece.position[0] })
+    const rank = parseInt(piece.position[1])
 
     let validMoves:Array<string> = []
 
     if (piece.name === 'Pawn') {
-      const rankProgression1 = piece.team === 'Light' ? parseInt(piece.position[1]) + 1 : parseInt(piece.position[1]) - 1
-      const rankProgression2 = piece.team === 'Light' ? parseInt(piece.position[1]) + 2 : parseInt(piece.position[1]) - 2
+      const rankProgression1 = piece.team === 'Light' ? rank + 1 : rank - 1
+      const rankProgression2 = piece.team === 'Light' ? rank + 2 : rank - 2
 
       const progression1Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${rankProgression1}`) === undefined
       const progression2Empty = this.pieces.value.find(x => x.position === `${piece.position[0]}${rankProgression2}`) === undefined
@@ -443,7 +444,31 @@ class Game {
         ...this.progressiveMoves('right', piece)
       ]
     } else if (piece.name === 'Knight') {
+      const potentialMoves:Array<string> = [
+        `${this.files[fileIndex + 1]}${rank + 2}`,
+        `${this.files[fileIndex + 1]}${rank - 2}`,
+        `${this.files[fileIndex - 1]}${rank + 2}`,
+        `${this.files[fileIndex - 1]}${rank - 2}`,
+        `${this.files[fileIndex + 2]}${rank + 1}`,
+        `${this.files[fileIndex - 2]}${rank + 1}`,
+        `${this.files[fileIndex + 2]}${rank - 1}`,
+        `${this.files[fileIndex - 2]}${rank - 1}`
+      ]
+      validMoves = [
+        ...validMoves,
+        ...potentialMoves.filter(move => {
+          const newPos = this.positions.value.find(x => x.name === move)
+          if (!newPos) return false
+          const positionHasGamePiece = this.pieces.value.find(x => x.position === newPos.name)
+          const positionHasEnemyPiece = positionHasGamePiece ? positionHasGamePiece.team === enemyTeam : false
 
+          if (!positionHasGamePiece) {
+            return true
+          } else if (positionHasEnemyPiece) {
+            return true
+          }
+        })
+      ]
     } else if (piece.name === 'Bishop') {
       validMoves = [
         ...validMoves,
@@ -453,7 +478,31 @@ class Game {
         ...this.progressiveMoves('down-right', piece)
       ]
     } else if (piece.name === 'King') {
+      const potentialMoves:Array<string> = [
+        `${piece.position[0]}${rank + 1}`,
+        `${piece.position[0]}${rank - 1}`,
+        `${this.files[fileIndex + 1]}${rank}`,
+        `${this.files[fileIndex - 1]}${rank}`,
+        `${this.files[fileIndex + 1]}${rank + 1}`,
+        `${this.files[fileIndex + 1]}${rank - 1}`,
+        `${this.files[fileIndex - 1]}${rank + 1}`,
+        `${this.files[fileIndex - 1]}${rank - 1}`
+      ]
+      validMoves = [
+        ...validMoves,
+        ...potentialMoves.filter(move => {
+          const newPos = this.positions.value.find(x => x.name === move)
+          if (!newPos) return false
+          const positionHasGamePiece = this.pieces.value.find(x => x.position === newPos.name)
+          const positionHasEnemyPiece = positionHasGamePiece ? positionHasGamePiece.team === enemyTeam : false
 
+          if (!positionHasGamePiece) {
+            return true
+          } else if (positionHasEnemyPiece) {
+            return true
+          }
+        })
+      ]
     }
 
     return validMoves
