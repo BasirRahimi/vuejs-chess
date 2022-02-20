@@ -2,7 +2,7 @@
   <div class="info">
     <div class="player">Player 2</div>
     <div class="captured">
-      <div v-for="capture in captured('Dark')" :key="capture.piece.name">
+      <div v-for="capture in captured('Light')" :key="capture.piece.name">
         <GamePiece :piece="capture.piece" />
         <span v-if="capture.count > 1">x{{ capture.count }}</span>
       </div>
