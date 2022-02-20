@@ -7,15 +7,12 @@
 
     <div class="spaces">
       <div v-for="position in game.positions"
-        :key="`space-${position.name}`"
+        :key="`pos-${position.name}`"
         class="space"
         :class="[position.colour, position.highlight ? 'highlight' : '']"
         @click="positionClicked(position)"
       >
-        <GamePiece
-          :piece="game.pieces.find(x => x.position === position.name)"
-          @piece-clicked="pieceClicked"
-        />
+        <GamePiece v-if="position.gamePiece" :piece="position.gamePiece" />
 
       </div>
     </div>
@@ -29,7 +26,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from 'vue'
-import { Game, Piece, Position } from '@/game-objects'
+import { Game, Position } from '@/game-objects'
 import GamePiece from './GamePiece.vue'
 
 export default defineComponent({
@@ -38,29 +35,24 @@ export default defineComponent({
   setup() {
     const game = ref(new Game())
 
-    const pieceClicked = (piece:Piece) => {
-      if ((piece.team === 'Light' && game.value.activePlayer === 2) ||
-      ((piece.team === 'Dark' && game.value.activePlayer === 1))) {
-        // clicked on enemy piece, abort
-        return
-      }
-
-      game.value.clearHighlights()
-      game.value.activePiece = piece
-      game.value.highLightValidMoves(piece)
-    }
-
     const positionClicked = (pos:Position) => {
-      if (!pos.highlight) return
-
-      game.value.moveActivePiece(pos)
-      game.value.clearHighlights()
-      game.value.activePlayer = game.value.activePlayer === 1 ? 2 : 1
+      if (pos.highlight) {
+        game.value.movePiece(pos)
+        game.value.clearHighlights()
+        game.value.activePlayer = game.value.activePlayer === 1 ? 2 : 1
+      } else if (pos.gamePiece) {
+        if ((pos.gamePiece.team === 'Light' && game.value.activePlayer === 2) ||
+        (pos.gamePiece.team === 'Dark' && game.value.activePlayer === 1)) {
+          return
+        }
+        game.value.clearHighlights()
+        game.value.activePos = pos
+        game.value.highLightValidMoves(pos)
+      }
     }
 
     return {
       game,
-      pieceClicked,
       positionClicked,
       GamePiece
     }

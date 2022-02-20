@@ -1,8 +1,6 @@
 <template>
-  <img v-if="piece"
-  :src="piece.img"
-  :alt="piece.imgAlt"
-  @click.stop="$emit('pieceClicked', piece)" />
+  <img :src="piece.img"
+  :alt="piece.imgAlt" />
 </template>
 <script lang="ts">
 import { defineComponent, PropType } from 'vue'
