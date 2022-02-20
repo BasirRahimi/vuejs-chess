@@ -13,3 +13,8 @@ export default defineComponent({
   }
 })
 </script>
+<style lang="scss" scoped>
+img {
+  display: inline-block;
+}
+</style>

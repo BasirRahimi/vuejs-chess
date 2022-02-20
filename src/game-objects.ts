@@ -523,6 +523,9 @@ class Game {
 
   movePiece = (pos:Position):void => {
     if (!this.activePos.value) return
+    if (pos.gamePiece) {
+      pos.gamePiece.status = 'Dead'
+    }
     pos.gamePiece = this.activePos.value.gamePiece
     this.activePos.value.gamePiece = undefined
 
